@@ -12,9 +12,11 @@
     "crossfilter": "1.3.12",
     "d3": "3.5.6",
     "d3-queue": "^2.0.3",
+    "jsdom": "9.4.0",
     "lodash-fp": "^0.10.4",
     "sinon": "^1.17.4",
-    "svg-transform": "0.0.3"
+    "svg-transform": "0.0.3",
+    "webpack": "1.13.1"
   },
   "scripts": {
     "format": "esformatter -i src/*.js",
