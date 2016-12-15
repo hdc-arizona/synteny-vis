@@ -3,12 +3,14 @@ import queue from 'd3-queue';
 import sv from './synteny-vis';
 import crossfilter from 'crossfilter';
 import { timeIt, zipObject } from './utils';
+import { genCogeSequenceLink } from './coge-util';
 
 exports.makeSyntenyDotPlot = function({
     data_url,
     element_id,
     genome_x,
-    genome_y
+    genome_y,
+    gen_coge_seq_link = genCogeSequenceLink
   }) {
   queue.queue()
     .defer(d3.text, data_url)
@@ -37,7 +39,14 @@ exports.makeSyntenyDotPlot = function({
 
       const ksDataObject = createDataObj(inlinedKSData, xCumLenMap, yCumLenMap);
       console.log('Total synteny dots:', ksDataObject.currentData().raw.length);
-      sv.controller(ksDataObject, element_id, {x_name, y_name, have_ks});
+
+      const meta = {
+        x_name,
+        y_name,
+        have_ks,
+        gen_coge_seq_link
+      };
+      sv.controller(ksDataObject, element_id, meta);
     });
 };
 

@@ -51,5 +51,12 @@ makeSyntenyDotplots({
   genome_y: {
     ...                  // same as above
   }
+
+  gen_coge_seq_link: function(aId, bId) {
+    // Create a URL for a CoGe sequence comparison. This will override the
+    // default link generation scheme, which defaults to
+    // 'http://genomevolution.org/coge/GEvo.pl?fid1=42;fid2=24;apply_all=50000;num_seqs=2'
+    return 'https://www.google.com#q=' + aId + '+' + bId;
+  }
 });
 ```
