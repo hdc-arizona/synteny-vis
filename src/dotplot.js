@@ -2,6 +2,7 @@ import utils from './utils';
 import d3 from 'd3';
 import transform from 'svg-transform';
 import { getSingleFeatureDescription } from './coge-util';
+import { shortenString } from './label-utils';
 const { minBy, zipObject, zipWith } = utils;
 
 import {
@@ -10,9 +11,12 @@ import {
   UNSELECTED_DOT_FILL,
   NUM_COLOR_SCALE_INTERPOLATION_SAMPLES,
   GEVO_CLICK_PROXIMITY_THRESHOLD_PIXELS,
+  MAX_SHORT_LABEL_LENGTH,
   DOTPLOT_COLOR_TRANS_LEN,
   MAXIMIZE_WIDTH,
-  MIN_TEXT_GAP,
+  MIN_GRID_LINE_GAP,
+  ESTIMATED_CHAR_WIDTH_IN_PX,
+  ESTIMATED_CHAR_HEIGHT_IN_PX,
   ROUNDING_FACTOR
 } from 'constants';
 
@@ -60,18 +64,20 @@ function synteny(id, dataObj, field, initialColorScale, meta) {
     return zipWith(function(a, b) {
       return b ? Math.abs(scale(b) - scale(a)) : 10000;
     }, values, values.slice(1))
-      .map(v => v > MIN_TEXT_GAP ? 1 : v / MIN_TEXT_GAP)
+      .map(v => v > MIN_GRID_LINE_GAP ? 1 : v / MIN_GRID_LINE_GAP)
       .map(v => 255 - Math.floor(v * 256))
       .map(v => Math.min(v, 245));
   };
 
-  const filterTextGaps = function(values, scale) {
+  const filterTextGaps = function(values, scale, labelSize) {
     return values.reduce(function(out, next) {
-      const first = out.length === 0;
-      const gap = Math.abs(scale(next) - scale(out[out.length - 1]));
-      const gap_has_elapsed = gap > MIN_TEXT_GAP;
-      if (first || gap_has_elapsed)
+      if(out.length === 0) return [next];
+      const last = out[out.length - 1];
+      const available = Math.abs(scale(next) - scale(last));
+      const required = (labelSize(next) + labelSize(last)) / 2;
+      if (available > required) {
         out.push(next);
+      }
       return out;
     }, []);
   };
@@ -118,28 +124,77 @@ function synteny(id, dataObj, field, initialColorScale, meta) {
     setSyntenyData();
   };
 
+  const xLabelSize = offset =>
+    xOffsetToName[offset].short.length * ESTIMATED_CHAR_WIDTH_IN_PX;
+
+  const yLabelSize = () => ESTIMATED_CHAR_HEIGHT_IN_PX;
+
   const makeLabels = function() {
 
-    const xFilter = x => (0 <= xScale(x) && xScale(x) <= getWidth());
-    const yFilter = y => (0 <= yScale(y) && yScale(y) <= getHeight());
+    const width = getWidth();
+    const height = getHeight();
+    const xFilter = x => (0 <= xScale(x) && xScale(x) <= width);
+    const yFilter = y => (0 <= yScale(y) && yScale(y) <= height);
 
-    const tempXOffsets = xOffsets.filter(xFilter);
-    const tempYOffsets = yOffsets.filter(yFilter);
-    const tempXGaps = filterTextGaps(xMidpoints.filter(xFilter), xScale);
-    const tempYGaps = filterTextGaps(yMidpoints.filter(yFilter), yScale);
+    const xGridOffsets = xOffsets.filter(xFilter);
+    const yGridOffsets = yOffsets.filter(yFilter);
 
-    xGridLines.tickValues(tempXOffsets);
-    xLabels.tickValues(tempXGaps);
-    yGridLines.tickValues(tempYOffsets);
-    yLabels.tickValues(tempYGaps);
+    const xTextOffsets = filterTextGaps(xMidpoints.filter(xFilter),
+                                        xScale,
+                                        xLabelSize);
+    const yTextOffsets = filterTextGaps(yMidpoints.filter(yFilter),
+                                        yScale,
+                                        yLabelSize);
+
+    xGridLines.tickValues(xGridOffsets);
+    xLabels.tickValues(xTextOffsets);
+    yGridLines.tickValues(yGridOffsets);
+    yLabels.tickValues(yTextOffsets);
+
+    const addXHoverLabel = (x, el) => {
+      const { short, full } = xOffsetToName[x];
+
+      // If the label fits, no need to do anything on hover.
+      if(full.length === short.length) {
+        return;
+      }
+
+      d3.select(el)
+        .append('tspan')
+        .attr('x', 0)
+        .attr('y', 2 * ESTIMATED_CHAR_HEIGHT_IN_PX)
+        .text(full);
+    };
+
+    const removeXHoverLabel = (x, el) => {
+      d3.select(el).selectAll('tspan').remove();
+    };
 
     xAxisGapsGroup.call(xLabels);
+    xAxisGapsGroup.selectAll('text')
+      .each(function(offset) {
+        this.mouseenter = () => addXHoverLabel(offset, this);
+        this.mouseleave = () => removeXHoverLabel(offset, this);
+      });
+
     yAxisGapsGroup.call(yLabels);
+    yAxisGapsGroup.selectAll('text')
+      .each(function(offset) {
+        this.mouseenter = () => {
+          yOffsetToName[offset].hover = true;
+          yAxisGapsGroup.call(yLabels);
+        };
+        this.mouseleave = () => {
+          yOffsetToName[offset].hover = false;
+          yAxisGapsGroup.call(yLabels);
+        };
+      });
+
     xAxisLineGroup.call(xGridLines);
     yAxisLineGroup.call(yGridLines);
 
-    const tempXOffsetDarknesses = darknessOfTextGaps(tempXOffsets, xScale);
-    const tempYOffsetDarknesses = darknessOfTextGaps(tempYOffsets, yScale);
+    const tempXOffsetDarknesses = darknessOfTextGaps(xGridOffsets, xScale);
+    const tempYOffsetDarknesses = darknessOfTextGaps(yGridOffsets, yScale);
 
     xAxisLineGroup.selectAll('line')
       .data(tempXOffsetDarknesses)
@@ -148,7 +203,6 @@ function synteny(id, dataObj, field, initialColorScale, meta) {
     yAxisLineGroup.selectAll('line')
       .data(tempYOffsetDarknesses)
       .style('stroke', d => d3.rgb(d, d, d));
-
   };
 
   var zoom = d3.behavior.zoom()
@@ -234,7 +288,7 @@ function synteny(id, dataObj, field, initialColorScale, meta) {
 
   var svg = d3.select(id);
 
-  var TEXT_OFFSET = 35;
+  var TEXT_OFFSET = 50;
   var TEXT_BOX_HEIGHT = 25;
   svg.append('text')
     .attr('x', (getWidth() + 2 * SYNTENY_MARGIN) / 3)
@@ -279,10 +333,16 @@ function synteny(id, dataObj, field, initialColorScale, meta) {
     };
   };
 
+  const makeLabelPair = full => ({
+    full,
+    short: shortenString(full, MAX_SHORT_LABEL_LENGTH)
+  });
+
   var xOffsets = dataObj.getXLineOffsets().filter(makeGapFilter());
   var xMidpoints = midpoints(xOffsets);
+  const xNames = dataObj.getXLineNames().map(makeLabelPair);
 
-  const xOffsetToName = zipObject(xMidpoints, dataObj.getXLineNames());
+  const xOffsetToName = zipObject(xMidpoints, xNames);
   const xAxisBase = () => d3.svg.axis().scale(xScale).orient('bottom');
 
   var xGridLines = xAxisBase()
@@ -290,7 +350,7 @@ function synteny(id, dataObj, field, initialColorScale, meta) {
     .tickSize(-getHeight());
 
   var xLabels = xAxisBase()
-    .tickFormat(x => xOffsetToName[x])
+    .tickFormat(x => xOffsetToName[x].short)
     .tickSize(0);
 
   const transformer = transform([
@@ -302,8 +362,9 @@ function synteny(id, dataObj, field, initialColorScale, meta) {
 
   var yOffsets = dataObj.getYLineOffsets().filter(makeGapFilter());
   var yMidpoints = midpoints(yOffsets);
+  const yNames = dataObj.getYLineNames().map(makeLabelPair);
 
-  const yOffsetToName = zipObject(yMidpoints, dataObj.getYLineNames());
+  const yOffsetToName = zipObject(yMidpoints, yNames);
   const yAxisBase = () => d3.svg.axis().scale(yScale).orient('left');
 
   var yGridLines = yAxisBase()
@@ -311,7 +372,10 @@ function synteny(id, dataObj, field, initialColorScale, meta) {
     .tickSize(-getWidth());
 
   var yLabels = yAxisBase()
-    .tickFormat(x => yOffsetToName[x])
+    .tickFormat(y => {
+      const { hover, full, short } = yOffsetToName[y];
+      return hover ? full : short;
+    })
     .tickSize(0);
 
   var yAxisWrapper = svg.append('g')

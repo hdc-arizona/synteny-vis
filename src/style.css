@@ -47,6 +47,11 @@
   stroke: rgba(0,0,0, 0.25);
 }
 
+/* chromosome boundary lines in dotplot */
+._synteny-dotplot-builder #dotplot .tick text {
+  font-family: monospace;
+}
+
 
 /* Histograms */
 
