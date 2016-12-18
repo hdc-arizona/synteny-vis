@@ -38,6 +38,23 @@ exports.computeBaseUrl = computeBaseUrl;
 /*
  * Generate a link to a sequence comparison page on CoGe for a pair of
  * chromosomes, identified by their CoGe database IDs.
+ *
+ * Note: This function will attempt to generate a link apropriate to the
+ * current URL using computeBaseUrl (See computeBaseUrl for details).
  */
-exports.genCogeSequenceLink = (id1, id2, loc = window.location) =>
-    computeBaseUrl(loc) + `/GEvo.pl?fid1=${id1};fid2=${id2};apply_all=50000;num_seqs=2`;
+exports.genCogeSequenceLink = (id1, id2) =>
+    computeBaseUrl(window.location) + `/GEvo.pl?fid1=${id1};fid2=${id2};apply_all=50000;num_seqs=2`;
+
+/*
+ * Fetch a GEvo feature description over HTTP. Returns a promise that
+ * resolves to a json object upon success.
+ *
+ * Note: This function will attempt to fetch from the API endpoint at the
+ * same origin as the current URL using computeBaseUrl (See computeBaseUrl
+ * for details).
+ */
+exports.getSingleFeatureDescription = (dbId) => {
+  const base = computeBaseUrl(window.location)
+  return fetch(base + `/api/v1/features/${dbId}`)
+    .then(response => response.json());
+}
