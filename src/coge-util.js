@@ -31,7 +31,7 @@ const computeBaseUrl = loc => {
   }
 
   return BASE_PATH_FOR_DEV;
-}
+};
 
 exports.computeBaseUrl = computeBaseUrl;
 
@@ -42,8 +42,10 @@ exports.computeBaseUrl = computeBaseUrl;
  * Note: This function will attempt to generate a link apropriate to the
  * current URL using computeBaseUrl (See computeBaseUrl for details).
  */
-exports.genCogeSequenceLink = (id1, id2) =>
-    computeBaseUrl(window.location) + `/GEvo.pl?fid1=${id1};fid2=${id2};apply_all=50000;num_seqs=2`;
+exports.genCogeSequenceLink = (id1, id2) => {
+  const base = computeBaseUrl(window.location);
+  return base + `/GEvo.pl?fid1=${id1};fid2=${id2};apply_all=50000;num_seqs=2`;
+};
 
 /*
  * Fetch a GEvo feature description over HTTP. Returns a promise that
@@ -54,7 +56,7 @@ exports.genCogeSequenceLink = (id1, id2) =>
  * for details).
  */
 exports.getSingleFeatureDescription = (dbId) => {
-  const base = computeBaseUrl(window.location)
+  const base = computeBaseUrl(window.location);
   return fetch(base + `/api/v1/features/${dbId}`)
     .then(response => response.json());
-}
+};
