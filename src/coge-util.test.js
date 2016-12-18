@@ -22,7 +22,7 @@ describe('computeBaseUrl', function() {
       origin: 'https://geco.iplantc.org',
       hostname: 'geco.iplantc.org',
       pathname: '/asherkhb/coge/SynMap.pl'
-    }).should.be.exactly('https://geco.iplantc.org/asherkhb/coge');
+    }).should.equal('https://geco.iplantc.org/asherkhb/coge');
 
   });
 
@@ -31,7 +31,7 @@ describe('computeBaseUrl', function() {
     computeBaseUrl({
       hostname: 'localhost',
       pathname: '/index.html'
-    }).should.be.exactly('https://genomevolution.org/coge');
+    }).should.equal('https://genomevolution.org/coge');
 
   });
 
