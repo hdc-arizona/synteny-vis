@@ -1,9 +1,9 @@
 /*
  * Truncate a string to n characters. If the input does not need to be
  * modified to satisfy the length limit, it will be returned without
- * modifications. If it does, the last character will be replaced with an
- * ellipsis to indicate that the original string extended beyond the
- * truncated string.
+ * modifications. If it does, it will be truncated to n characters, and
+ * the nth character will be replaced with an ellipsis to indicate that
+ * the original string extended beyond the truncated string.
  *
  * Examples:
  * shortenString("ab", 3)   === "ab"
