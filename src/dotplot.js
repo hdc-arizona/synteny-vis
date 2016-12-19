@@ -173,18 +173,18 @@ function synteny(id, dataObj, field, initialColorScale, meta) {
     xAxisGapsGroup.call(xLabels);
     xAxisGapsGroup.selectAll('text')
       .each(function(offset) {
-        this.mouseenter = () => addXHoverLabel(offset, this);
-        this.mouseleave = () => removeXHoverLabel(offset, this);
+        this.onmouseenter = () => addXHoverLabel(offset, this);
+        this.onmouseleave = () => removeXHoverLabel(offset, this);
       });
 
     yAxisGapsGroup.call(yLabels);
     yAxisGapsGroup.selectAll('text')
       .each(function(offset) {
-        this.mouseenter = () => {
+        this.onmouseenter = () => {
           yOffsetToName[offset].hover = true;
           yAxisGapsGroup.call(yLabels);
         };
-        this.mouseleave = () => {
+        this.onmouseleave = () => {
           yOffsetToName[offset].hover = false;
           yAxisGapsGroup.call(yLabels);
         };
