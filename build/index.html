@@ -35,7 +35,15 @@
 		<span id='2a-link' class="underline hover-black" onClick="load('2a')">Aribidopsis2</span>,
 		<span id='2e-link' class="underline hover-black" onClick="load('2e')">Ecoli2</span>,
 		<span id='2h-link' class="underline hover-black" onClick="load('2h')">Homo Sapiens - Pan Troglodytes2</span>
-    <span id='z-link' class="underline hover-black" onClick="load('z')">Many chromosomes test</span>
+		<span id='z-link' class="underline hover-black" onClick="load('z')">Many chromosomes test</span>
+
+		<div>
+			<span id='p-link' class="underline hover-black" onClick="load('p')">plasmodium1</span>
+			<span id='2p-link' class="underline hover-black" onClick="load('2p')">plasmodium2</span>
+			<span id='3p-link' class="underline hover-black" onClick="load('3p')">plasmodium3</span>
+			<span id='4p-link' class="underline hover-black" onClick="load('4p')">plasmodium4</span>
+		</div>
+
 	</div>
 
 	<div id="main"></div>
@@ -88,7 +96,27 @@
 				identifier: 'z',
 				id_1: '19927',
 				id_2: '9050',
-        data_url: './data/19927_9050.CDS-CDS.last.tdd10.cs0.filtered.dag.all.go_D20_g10_A5.aligncoords.gcoords'
+        		data_url: './data/19927_9050.CDS-CDS.last.tdd10.cs0.filtered.dag.all.go_D20_g10_A5.aligncoords.gcoords'
+			}, {
+				identifier: 'p',
+				id_1: 'p',
+				id_2: 'p',
+        		data_url: './data/p.ks'
+			}, {
+				identifier: '2p',
+				id_1: '2p',
+				id_2: '2p',
+        		data_url: './data/2p.ks'
+			}, {
+				identifier: '3p',
+				id_1: '3p',
+				id_2: '3p',
+        		data_url: './data/3p.ks'
+			}, {
+				identifier: '4p',
+				id_1: '4p',
+				id_2: '4p',
+        		data_url: './data/4p.ks'
 			}];
 
 		var load = function(dataset) {

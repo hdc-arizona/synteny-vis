@@ -1,0 +1,17 @@
+P.vivax,2460
+P.cynomolgi,32770
+P.inui,35091
+P.fragile nilgiri,35092
+P.coatneyi,32801
+P.knowlesi,19106
+P.malariae,32826
+P.ovale curtisi,32958
+P.chabaudi,32902
+P.vinckei petteri,35095
+P.vinckei vinckei,35093
+P.berghei,32903
+P.yoelii,32865
+P.falciparum,19306
+P.reichenowi,32904
+P.gaboni,32788
+P.relictum,35088
