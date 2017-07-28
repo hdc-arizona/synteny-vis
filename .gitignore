@@ -1,3 +1,13 @@
+.DS_Store
+package-lock.json
+
+build/data/p.ks
+build/data/2p.ks
+build/data/3p.ks
+build/data/4p.ks
+build/data0/
+build/lengths0/
+
 node_modules
 build/*.js
 build/*.js.map

@@ -1,8 +1,10 @@
 import crossfilter from 'crossfilter';
 import { zipObject } from './utils';
+import { Tree } from './bvhTree';
+
 
 function createDataObj(syntenyDots, xmapPair, ymapPair) {
-  const xmap = xmapPair.nt;
+  const xmap = xmapPair.nt; //nt = {chromosomeName:total} ?
   const ymap = ymapPair.nt;
   const ret = {};
 
@@ -11,10 +13,15 @@ function createDataObj(syntenyDots, xmapPair, ymapPair) {
   const cross_x = cross.dimension(x => x.x_relative_offset);
   const cross_y = cross.dimension(x => x.y_relative_offset);
   const fields = ['logks', 'logkn', 'logknks'];
+
+  //a dict of { field: cross.dimension(field) }
   const filters = zipObject(
     fields,
     fields.map(field => cross.dimension(x => x[field]))
   );
+
+  ret.tree = new Tree(syntenyDots, 3000);
+  //console.log(ret.tree._dumpNodes());
 
   ret.getXLineOffsets = () => Object.values(xmap).sort((a, b) => a - b);
 
@@ -34,11 +41,18 @@ function createDataObj(syntenyDots, xmapPair, ymapPair) {
       .filter(x => x !== 'total');
   }
 
-  ret.currentData = function currentData() {
-    return {
-      raw: syntenyDots,
-      active: cross_all.top(Infinity)
-    };
+  ret.currentData = function currentData(viewBox=null) {
+    if(viewBox === null){
+      return {
+        raw: syntenyDots,
+        active: cross_all.top(Infinity)
+      };
+    }else{
+      return {
+        raw: syntenyDots,
+        active: ret.tree.dotsIn(viewBox, cross_all.top(Infinity))
+      };
+    }
   };
 
   ret.currentDataSummary = function currentDataSummary(raw_ticks, field) {
@@ -61,9 +75,12 @@ function createDataObj(syntenyDots, xmapPair, ymapPair) {
         })
       );
     };
+
+
   };
 
   ret.addSpatialFilter = function(extents, typeHint) {
+
     cross_x.filter([extents[0][0], extents[1][0]]);
     cross_y.filter([extents[0][1], extents[1][1]]);
     ret.notifyListeners(typeHint);

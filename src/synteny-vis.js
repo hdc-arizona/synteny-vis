@@ -162,6 +162,7 @@ function buildDiv(element_id, show_histograms) {
     .text('No Point Selected');
 }
 
+
 function controller(ksData, element_id, meta) {
   var chromosomeOrderFun, dataObj;
 
@@ -169,10 +170,10 @@ function controller(ksData, element_id, meta) {
     chromosomeOrderFun = newOrderFun;
     const xCumLenMap = chromosomesToCumulativeBPCounts(
       meta.genome_x.chromosomes, chromosomeOrderFun);
+
     const yCumLenMap = chromosomesToCumulativeBPCounts(
       meta.genome_y.chromosomes, chromosomeOrderFun);
     const inlinedKSData = inlineKSData(ksData, xCumLenMap, yCumLenMap);
-    
     dataObj = createDataObj(inlinedKSData, xCumLenMap, yCumLenMap);
   }
 

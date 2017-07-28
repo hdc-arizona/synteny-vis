@@ -100,11 +100,13 @@ function histogram(id, dataObj, field, colorScale) {
     .classed('yAxis', true).call(yAxis);
 
   const updateHeights = function(selection) {
-    selection.transition(); // cancel transition
+    //commented because it doesnt work on large datasets
+    //selection.transition(); // cancel transition
     selection.attr('y', d => yPlotScale(d.y));
   };
   const updateColors = function(selection) {
-    selection.transition(); // cancel transition
+    //commented because it doesnt work on large datasets
+    //selection.transition(); // cancel transition
     const extent =
     plotBrush.empty() ? [-Infinity, Infinity] : plotBrush.extent();
     const active = bin => bin.x + bin.dx > extent[0] && bin.x < extent[1];
@@ -127,8 +129,8 @@ function histogram(id, dataObj, field, colorScale) {
     dataBarSel.transition(); /* cancel previous transition */
 
     typeHint = typeHint || '';
-
     const summary = summaryF();
+
     let tempSel = dataBarSel.data(summary);
 
     if (typeHint.indexOf('stop') > -1) {
