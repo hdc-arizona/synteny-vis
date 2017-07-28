@@ -25,6 +25,7 @@ const generateColorScaleFromExtrema = extrema => {
   // Function calls on colorscales mutate the object, but since we call the
   // function with monotonically non-decreasing indices and the scale remembers
   // the colors it assigned to indices before, we are safe here.
+  /*
   const pairs = extrema
     .map((d, i, A) => {
       var color;
@@ -39,6 +40,26 @@ const generateColorScaleFromExtrema = extrema => {
       return { midpoint: d.x + d.dx / 2, color };
     })
     .filter(({ color }) => color !== undefined);
+  */
+
+
+
+  //assign colors by y values instead of x
+  //sort by y (decreasing)
+  ///*
+  var pairs = extrema.slice().sort(function(a,b){return b.y-a.y;});
+  pairs = pairs.map(function(d,i,A){
+    var color;
+    if (isMaximum(extrema, extrema.indexOf(d))) {
+      color = colors(i);
+    }
+    return { midpoint: d.x + d.dx / 2, color }; 
+  })
+  .filter(({ color }) => color !== undefined);
+  //restore the order for consistency
+  pairs.sort(function(a,b){return a.midpoint-b.midpoint;});
+  //*/
+
 
   return d3.scale.linear()
            .domain(pairs.map(d => d.midpoint))
