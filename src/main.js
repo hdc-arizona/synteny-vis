@@ -75,7 +75,7 @@ function ksTextToObjects(text) {
       }
     }
     if (isFinite(line.logkn)) {
-      if (min_logkn === undefined || line.logkn > min_logkn) {
+      if (min_logkn === undefined || line.logkn < min_logkn) {
         min_logkn = line.logkn;
       }
     }
