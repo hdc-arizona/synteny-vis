@@ -244,6 +244,32 @@ function synteny(id, dataObj, field, initialColorScale, meta) {
     });
   }
 
+  ////////////////////////////////////////////////////////////////////////////
+  // crosshairs
+
+  var crossHairs;
+  function createCrossHairs(svg) {
+    var crossHairsG = svg.append('g');
+    var crossHairsH = crossHairsG
+          .append('line')
+          .attr('x1', 0)
+          .attr('x2', getWidth());
+    var crossHairsV = crossHairsG
+          .append('line')
+          .attr('y1', 0)
+          .attr('y2', getHeight());
+    crossHairsG.attr('stroke', 'gray');
+    return {
+      update: function(el) {
+        const mouse = d3.mouse(el);
+        crossHairsH.attr('y1', mouse[1]);
+        crossHairsH.attr('y2', mouse[1]);
+        crossHairsV.attr('x1', mouse[0]);
+        crossHairsV.attr('x2', mouse[0]);
+      }
+    };
+  }
+  
   /* We are copying the scale here because brushes do not play nice with
    * zooming. All sorts of nasty things happen when the scales get changed
    * underneath a brush. */
@@ -253,6 +279,7 @@ function synteny(id, dataObj, field, initialColorScale, meta) {
     .x(xScale.copy())
     .y(yScale.copy())
     .on('brush', function() {
+      crossHairs.update(this);
       if (!brush.empty()) {
         dataObj.addSpatialFilter(brush.extent(), 'spatial');
         resizeBrushBoundary();
@@ -401,11 +428,19 @@ function synteny(id, dataObj, field, initialColorScale, meta) {
       transform([{translate: [SYNTENY_MARGIN, SYNTENY_MARGIN]}]))
     .append('g').attr('id', 'zoom-group')
     .call(zoom).on('mousedown.zoom', null); //disable panning
+  
+  // create crosshairs after zoom group but before brush group
+  // to avoid stealing the click
+  crossHairs = createCrossHairs(svg);
 
   var brushGroup = svg
     .append('g').attr('clip-path', 'url(#plot-clip-box)')
     .append('g').attr('id', 'brush-group')
-    .call(brush);
+    .call(brush)
+    .on('mousemove', function() {
+      crossHairs.update(this);
+      return true;
+    });
 
   var colorScale = initialColorScale;
 
